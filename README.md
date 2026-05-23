@@ -10,13 +10,29 @@ A macOS menu-bar app with a floating traffic-light widget that shows real-time A
 
 ## Quick start (end users)
 
+### Install from GitHub Releases (recommended)
+
+1. Download **`AITrafficLight-x.y.z-macOS-universal.dmg`** from [Releases](https://github.com/vangeldu/ai_traffic_light/releases)
+2. Open the DMG, drag **AI Traffic Light** into **Applications**
+3. **First launch only** (unsigned build) — use either method:
+   - **Right-click** the app → **Open** → **Open** again, or
+   - Double-click once (it may be blocked), then open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** / **仍要打开**
+4. Fully quit and reopen **Cursor**, **Claude Code**, and/or **Codex** once
+5. Use your tools as usual — the lamp follows agent activity
+
+The release build is a **universal binary** (Apple Silicon + Intel). Requires **macOS 13+**.
+
+A `.zip` of the app is also attached to each release if you prefer that over the DMG.
+
+### Build from source
+
 ```bash
-# 1. Build or download the app, then open it
+# Build .app for local development (host architecture only)
+./scripts/build.sh
 open dist/AITrafficLight.app
 
-# 2. Fully quit and reopen Cursor, Claude Code, and/or Codex once
-
-# 3. Use your tools as usual — the lamp follows agent activity
+# Build release artifacts for GitHub (universal + DMG + ZIP)
+./scripts/release.sh 1.0.0
 ```
 
 **No install scripts are required.** On first launch, the app automatically:
@@ -30,14 +46,24 @@ Use the menu-bar item **Reinstall IDE Integration** if hooks need to be refreshe
 ## For developers
 
 ```bash
-# Build the .app bundle
+# Build .app (host architecture, fast local iteration)
 ./scripts/build.sh
+
+# Build .app (Apple Silicon + Intel)
+./scripts/build.sh --universal
+
+# Release: universal .app + DMG + ZIP + checksums
+./scripts/release.sh 1.0.0
 
 # Run locally (uses repo ui/widget.html)
 ./scripts/run.sh
 
 # Optional: install hooks without launching the app
 ./scripts/install-all-hooks.sh
+
+# Publish a GitHub Release (after pushing tag v1.0.0)
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
 Requirements: macOS 13+, Xcode Command Line Tools (Swift). Python 3 is used by bundled helper scripts (Codex trust, dev install); macOS includes it by default.
@@ -128,6 +154,7 @@ $HOOK set idle all          # reset every source
 ## Notes
 
 - **Restart IDEs** after the first install or after **Reinstall IDE Integration**.
+- **First open (unsigned)**: macOS may block the app on the first launch. Either **right-click → Open**, or after a blocked double-click go to **System Settings → Privacy & Security** and choose **Open Anyway**. A signed/notarized build would skip this (see Roadmap).
 - **Codex**: hooks are enabled and trusted automatically; if the lamp does not react, quit Codex completely (Cmd+Q) and reopen it.
 - Claude Code and Codex hooks are **appended** to your existing hook config (other hooks are kept).
 - Cursor hook entries managed by this app are **replaced** on reinstall; removed events (for example old `afterAgentThought` entries) are cleaned up.
@@ -135,7 +162,7 @@ $HOOK set idle all          # reset every source
 ## Roadmap
 
 - Login item / launch at startup
-- Code signing and distribution
+- Apple Developer ID signing and notarization
 
 ## License
 

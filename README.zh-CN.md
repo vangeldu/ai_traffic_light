@@ -10,13 +10,29 @@ macOS 菜单栏 + 悬浮窗 AI 状态红绿灯，实时显示 **Cursor**、**Cla
 
 ## 快速开始（给最终用户）
 
+### 从 GitHub Releases 安装（推荐）
+
+1. 在 [Releases](https://github.com/vangeldu/ai_traffic_light/releases) 下载 **`AITrafficLight-x.y.z-macOS-universal.dmg`**
+2. 打开 DMG，把 **AI Traffic Light** 拖进 **Applications**
+3. **首次打开**（未签名版本，任选一种）：
+   - **右键** App → **打开** → 再点 **打开**，或
+   - 先双击一次（可能被拦截），再打开 **系统设置 → 隐私与安全性**，向下找到 **仍要打开** / **Open Anyway** 并点击
+4. 完全退出并重新打开 **Cursor / Claude Code / Codex** 一次
+5. 正常使用，悬浮灯会跟随 Agent 状态
+
+Release 包是 **Universal 二进制**（Apple Silicon + Intel），需要 **macOS 13+**。
+
+每个 Release 也会附带 `.zip`，不想用 DMG 可以直接解压。
+
+### 从源码编译
+
 ```bash
-# 1. 编译或下载 App 后打开
+# 本地开发（仅当前机器架构）
+./scripts/build.sh
 open dist/AITrafficLight.app
 
-# 2. 首次集成后，完全退出并重新打开 Cursor / Claude Code / Codex
-
-# 3. 正常使用，悬浮灯会跟随 Agent 状态变化
+# 打 GitHub Release 包（Universal + DMG + ZIP）
+./scripts/release.sh 1.0.0
 ```
 
 **不需要**手动运行任何 install 脚本。App 首次启动时会自动：
@@ -30,14 +46,24 @@ open dist/AITrafficLight.app
 ## 开发者
 
 ```bash
-# 编译 .app
+# 编译 .app（本机架构，开发迭代快）
 ./scripts/build.sh
 
-# 本地运行（使用仓库里的 ui/widget.html）
+# 编译 .app（Apple Silicon + Intel）
+./scripts/build.sh --universal
+
+# 打 Release：Universal .app + DMG + ZIP + 校验和
+./scripts/release.sh 1.0.0
+
+# 本地运行
 ./scripts/run.sh
 
-# 可选：不打开 App，仅安装 hooks（调试）
+# 可选：不打开 App，仅安装 hooks
 ./scripts/install-all-hooks.sh
+
+# 发布 GitHub Release（先推送 tag v1.0.0）
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
 环境要求：macOS 13+、Xcode Command Line Tools（Swift）。Python 3 用于内置辅助脚本（Codex 信任、开发安装）；macOS 自带。
@@ -128,6 +154,7 @@ $HOOK set idle all          # 重置全部来源
 ## 注意事项
 
 - **首次安装或重新安装集成后，请重启对应 IDE**。
+- **首次打开（未签名）**：macOS 可能拦截首次启动。可 **右键 → 打开**，或在双击被拦后进入 **系统设置 → 隐私与安全性**，点 **仍要打开**。正式签名公证后可免此步骤（见后续计划）。
 - **Codex**：hook 会自动启用并信任；若灯无反应，请完全退出 Codex（Cmd+Q）后重开。
 - Claude Code / Codex 的 hook 会**追加**到现有配置，不会覆盖你的其他 hook。
 - Cursor 由本 App 管理的 hook 会在重装时**更新**；已移除的事件（如旧的 `afterAgentThought`）会被自动清理。
@@ -135,7 +162,7 @@ $HOOK set idle all          # 重置全部来源
 ## 后续计划
 
 - 登录项自动启动
-- 代码签名与分发
+- Apple Developer ID 签名与公证
 
 ## 许可证
 

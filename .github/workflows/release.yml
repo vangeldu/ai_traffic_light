@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build release artifacts
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          APP_BUILD="${GITHUB_RUN_NUMBER}" ./scripts/release.sh "$TAG"
+
+      - name: Upload GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/AITrafficLight-*-macOS-universal.dmg
+            dist/AITrafficLight-*-macOS-universal.zip
+            dist/SHA256SUMS
+          generate_release_notes: true

@@ -10,16 +10,43 @@ HOOKS_RESOURCE_DIR="${RESOURCE_DIR}/hooks"
 ICONSET="${ROOT}/assets/AppIcon.iconset"
 ICNS="${ROOT}/assets/AppIcon.icns"
 
+UNIVERSAL="${UNIVERSAL:-0}"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --universal)
+      UNIVERSAL=1
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      echo "Usage: $0 [--universal]" >&2
+      exit 1
+      ;;
+  esac
+done
+
 mkdir -p "$RESOURCE_DIR" "$HOOKS_RESOURCE_DIR"
 cp "${ROOT}/ui/widget.html" "${RESOURCE_DIR}/widget.html"
 cp "${ROOT}/hooks/"*.fragment.json "$HOOKS_RESOURCE_DIR/"
 cp "${ROOT}/hooks/trust-codex-hooks.py" "$HOOKS_RESOURCE_DIR/"
 
 cd "$APP_DIR"
-swift build -c release --product AITrafficLight --product AITrafficLightHook
 
-BIN="${APP_DIR}/.build/release/AITrafficLight"
-HOOK_BIN="${APP_DIR}/.build/release/AITrafficLightHook"
+BUILD_FLAGS=(-c release)
+ARCH_FLAGS=()
+if [[ "$UNIVERSAL" == "1" ]]; then
+  ARCH_FLAGS=(--arch arm64 --arch x86_64)
+  BIN_DIR="${APP_DIR}/.build/apple/Products/Release"
+  echo "Building universal binary (Apple Silicon + Intel)..."
+else
+  BIN_DIR="${APP_DIR}/.build/release"
+  echo "Building for host architecture ($(uname -m))..."
+fi
+
+swift build "${BUILD_FLAGS[@]}" "${ARCH_FLAGS[@]}" --product AITrafficLight --product AITrafficLightHook
+
+BIN="${BIN_DIR}/AITrafficLight"
+HOOK_BIN="${BIN_DIR}/AITrafficLightHook"
 
 echo "Generating A5 app icon..."
 mkdir -p "${ROOT}/assets"
@@ -37,7 +64,10 @@ cp "$HOOKS_RESOURCE_DIR/"*.fragment.json "$APP_BUNDLE/Contents/Resources/hooks/"
 cp "$HOOKS_RESOURCE_DIR/trust-codex-hooks.py" "$APP_BUNDLE/Contents/Resources/hooks/"
 cp "$ICNS" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
 
-cat > "$APP_BUNDLE/Contents/Info.plist" <<'EOF'
+APP_VERSION="${APP_VERSION:-1.0.0}"
+APP_BUILD="${APP_BUILD:-1}"
+
+cat > "$APP_BUNDLE/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -55,9 +85,9 @@ cat > "$APP_BUNDLE/Contents/Info.plist" <<'EOF'
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
-  <string>1.0.0</string>
+  <string>${APP_VERSION}</string>
   <key>CFBundleVersion</key>
-  <string>1</string>
+  <string>${APP_BUILD}</string>
   <key>LSMinimumSystemVersion</key>
   <string>13.0</string>
   <key>LSUIElement</key>
@@ -68,6 +98,8 @@ EOF
 
 echo
 echo "Built binary: $BIN"
+file "$BIN"
 echo "Built hook:   $HOOK_BIN"
+file "$HOOK_BIN"
 echo "Built app:    $APP_BUNDLE"
 echo "App icon:     $ICNS (A5 · HIG-compliant)"
