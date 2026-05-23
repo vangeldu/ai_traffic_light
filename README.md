@@ -8,6 +8,8 @@ A macOS menu-bar app with a floating traffic-light widget that shows real-time A
 - 🟡 **Thinking** — prompt submitted or reasoning in progress
 - 🔴 **Running** — tool call in progress
 
+![AI Traffic Light floating widget on macOS](assets/screenshot.png)
+
 ## Quick start (end users)
 
 ### Install from GitHub Releases (recommended)

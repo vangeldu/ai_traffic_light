@@ -8,6 +8,8 @@ macOS 菜单栏 + 悬浮窗 AI 状态红绿灯，实时显示 **Cursor**、**Cla
 - 🟡 **思考中** — 已提交 prompt / 推理中
 - 🔴 **运行中** — 工具调用中
 
+![macOS 悬浮 AI 红绿灯](assets/screenshot.png)
+
 ## 快速开始（给最终用户）
 
 ### 从 GitHub Releases 安装（推荐）
