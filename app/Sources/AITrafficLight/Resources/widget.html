@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -36,7 +36,7 @@
       height: var(--h);
       overflow: hidden;
       background: transparent;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
     }
 
     .widget {
@@ -156,11 +156,11 @@
       <div class="light green" data-state="idle"></div>
     </div>
 
-    <div class="status" id="status">空闲</div>
+    <div class="status" id="status">Idle</div>
   </div>
 
   <script>
-    const LABELS = { idle: "空闲", thinking: "思考", running: "运行" };
+    const LABELS = { idle: "Idle", thinking: "Thinking", running: "Running" };
     const params = new URLSearchParams(location.search);
     const lightsEl = document.getElementById("lights");
     const statusEl = document.getElementById("status");

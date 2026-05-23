@@ -37,7 +37,7 @@ enum HookInstaller {
         do {
             try installBundledCLI()
         } catch {
-            errors.append("安装 hook 程序失败：\(error.localizedDescription)")
+            errors.append("Failed to install hook CLI: \(error.localizedDescription)")
             return HookInstallResult(errors: errors)
         }
 
@@ -82,20 +82,20 @@ enum HookInstaller {
 
         UserDefaults.standard.set(true, forKey: codexNoticeKey)
         let alert = NSAlert()
-        alert.messageText = "IDE 集成已就绪"
+        alert.messageText = "IDE integration ready"
         alert.informativeText = """
-        已自动配置 Cursor、Claude Code 和 Codex 的 hooks，并尝试自动信任 Codex hook。
+        Cursor, Claude Code, and Codex hooks are configured. Codex hooks were auto-trusted when possible.
 
-        若 Codex 灯仍无反应，请完全退出并重启 Codex.app 后再试。
+        If the Codex lamp still does not react, fully quit and reopen Codex.app.
         """
-        alert.addButton(withTitle: "知道了")
+        alert.addButton(withTitle: "OK")
         alert.runModal()
     }
 
     private static func installBundledCLI() throws {
         guard let bundled = bundledHookCLI() else {
             throw NSError(domain: "HookInstaller", code: 1, userInfo: [
-                NSLocalizedDescriptionKey: "未找到内置 hook 程序"
+                NSLocalizedDescriptionKey: "Bundled hook CLI not found"
             ])
         }
 
@@ -152,7 +152,7 @@ enum HookInstaller {
 
     private static func mergeCursor(configURL: URL, hookCommand: String, errors: inout [String]) {
         guard let fragment = loadFragment(named: "cursor-hooks.fragment", hookCommand: hookCommand) else {
-            errors.append("缺少 Cursor hook 配置")
+            errors.append("Missing Cursor hook configuration")
             return
         }
 
@@ -190,7 +190,7 @@ enum HookInstaller {
         errors: inout [String]
     ) {
         guard let fragment = loadFragment(named: resourceName, hookCommand: hookCommand) else {
-            errors.append("缺少 \(source) hook 配置")
+            errors.append("Missing \(source) hook configuration")
             return
         }
 
@@ -249,7 +249,7 @@ enum HookInstaller {
             try FileManager.default.createDirectory(at: configURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             try text.write(to: configURL, atomically: true, encoding: .utf8)
         } catch {
-            errors.append("写入 Codex config.toml 失败：\(error.localizedDescription)")
+            errors.append("Failed to write Codex config.toml: \(error.localizedDescription)")
         }
     }
 
@@ -259,7 +259,7 @@ enum HookInstaller {
 
     private static func trustCodexHooks(errors: inout [String]) {
         guard let script = bundledTrustScript() else {
-            errors.append("缺少 Codex hook 信任脚本")
+            errors.append("Missing Codex hook trust script")
             return
         }
 
@@ -274,7 +274,7 @@ enum HookInstaller {
         do {
             try process.run()
         } catch {
-            errors.append("运行 Codex hook 信任脚本失败：\(error.localizedDescription)")
+            errors.append("Failed to run Codex hook trust script: \(error.localizedDescription)")
             return
         }
 
@@ -283,7 +283,7 @@ enum HookInstaller {
             let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
             let message = String(data: stderrData, encoding: .utf8)?
                 .trimmingCharacters(in: .whitespacesAndNewlines)
-            errors.append(message?.isEmpty == false ? message! : "Codex hook 信任失败")
+            errors.append(message?.isEmpty == false ? message! : "Codex hook trust failed")
             return
         }
     }
@@ -329,7 +329,7 @@ enum HookInstaller {
             let data = try JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])
             try data.write(to: url, options: .atomic)
         } catch {
-            errors.append("写入 \(label) 配置失败：\(error.localizedDescription)")
+            errors.append("Failed to write \(label) configuration: \(error.localizedDescription)")
         }
     }
 }

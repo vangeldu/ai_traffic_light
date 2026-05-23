@@ -79,7 +79,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" <<EOF
 <plist version="1.0">
 <dict>
   <key>CFBundleDevelopmentRegion</key>
-  <string>zh-Hans</string>
+  <string>en</string>
   <key>CFBundleExecutable</key>
   <string>AITrafficLight</string>
   <key>CFBundleIconFile</key>

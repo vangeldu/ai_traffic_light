@@ -190,10 +190,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         updateStatusBarIcon(for: lastState)
 
         let menu = NSMenu()
-        menu.addItem(withTitle: "显示悬浮窗", action: #selector(showPanel), keyEquivalent: "")
-        menu.addItem(withTitle: "重新安装 IDE 集成", action: #selector(reinstallHooks), keyEquivalent: "")
+        menu.addItem(withTitle: "Show Widget", action: #selector(showPanel), keyEquivalent: "")
+        menu.addItem(withTitle: "Reinstall IDE Integration", action: #selector(reinstallHooks), keyEquivalent: "")
         menu.addItem(.separator())
-        menu.addItem(withTitle: "退出", action: #selector(quitApp), keyEquivalent: "q")
+        menu.addItem(withTitle: "Quit", action: #selector(quitApp), keyEquivalent: "q")
         statusItem.menu = menu
     }
 
@@ -207,13 +207,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             DispatchQueue.main.async {
                 let alert = NSAlert()
                 if result.succeeded {
-                    alert.messageText = "IDE 集成已更新"
-                    alert.informativeText = "Cursor、Claude Code、Codex 的 hooks 已重新写入。请重启对应 IDE。"
+                    alert.messageText = "IDE integration updated"
+                    alert.informativeText = "Hooks for Cursor, Claude Code, and Codex were reinstalled. Restart each IDE."
                 } else {
-                    alert.messageText = "部分 IDE 集成失败"
+                    alert.messageText = "IDE integration partially failed"
                     alert.informativeText = result.errors.joined(separator: "\n")
                 }
-                alert.addButton(withTitle: "知道了")
+                alert.addButton(withTitle: "OK")
                 alert.runModal()
             }
         }
