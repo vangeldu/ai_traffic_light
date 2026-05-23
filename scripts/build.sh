@@ -47,6 +47,7 @@ swift build "${BUILD_FLAGS[@]}" "${ARCH_FLAGS[@]}" --product AITrafficLight --pr
 
 BIN="${BIN_DIR}/AITrafficLight"
 HOOK_BIN="${BIN_DIR}/AITrafficLightHook"
+RESOURCE_BUNDLE="${BIN_DIR}/AITrafficLight_AITrafficLight.bundle"
 
 echo "Generating A5 app icon..."
 mkdir -p "${ROOT}/assets"
@@ -59,6 +60,11 @@ mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources/hooks"
 
 cp "$BIN" "$APP_BUNDLE/Contents/MacOS/AITrafficLight"
+if [[ ! -d "$RESOURCE_BUNDLE" ]]; then
+  echo "Missing SPM resource bundle: $RESOURCE_BUNDLE" >&2
+  exit 1
+fi
+cp -R "$RESOURCE_BUNDLE" "$APP_BUNDLE/Contents/Resources/"
 cp "$HOOK_BIN" "$APP_BUNDLE/Contents/Resources/hooks/ai-traffic-light-hook"
 cp "$HOOKS_RESOURCE_DIR/"*.fragment.json "$APP_BUNDLE/Contents/Resources/hooks/"
 cp "$HOOKS_RESOURCE_DIR/trust-codex-hooks.py" "$APP_BUNDLE/Contents/Resources/hooks/"
