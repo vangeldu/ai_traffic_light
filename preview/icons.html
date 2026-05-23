@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Traffic Light · 图标预览</title>
+  <style>
+    :root {
+      --page: #111218;
+      --panel: #1a1d27;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: rgba(255, 255, 255, 0.86);
+      --muted: rgba(255, 255, 255, 0.52);
+      --accent: #6ea8fe;
+      --red: #ff453a;
+      --yellow: #ffd60a;
+      --green: #30d158;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+      background: var(--page);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 36px 24px 64px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+    }
+
+    .sub {
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .card h3 {
+      margin: 0 0 4px;
+      font-size: 14px;
+    }
+
+    .card p {
+      margin: 0 0 14px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .showcase {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 88px;
+      gap: 14px;
+    }
+
+    .menubar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      min-width: 140px;
+      justify-content: flex-end;
+    }
+
+    .menubar.light {
+      background: rgba(255, 255, 255, 0.92);
+      color: rgba(0, 0, 0, 0.82);
+    }
+
+    .menubar.dark {
+      background: rgba(28, 28, 30, 0.92);
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .menubar-label {
+      font-size: 11px;
+      opacity: 0.55;
+    }
+
+    .app-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      align-items: end;
+    }
+
+    .size-label {
+      display: block;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .pick {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .pick strong { color: #dbeafe; }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    button.active {
+      border-color: rgba(110, 168, 254, 0.45);
+      background: rgba(110, 168, 254, 0.12);
+      color: #dbeafe;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>AI Traffic Light 图标预览</h1>
+    <p class="sub">状态栏已选：<strong>方案 B · 胶囊外壳</strong>。灯序与悬浮窗一致：<strong>上红 · 中黄 · 下绿</strong>。</p>
+
+    <section>
+      <h2>状态栏图标（Menu Bar）</h2>
+      <p class="hint">macOS Template 单色。灯序与悬浮窗相同：顶部红灯 · 中间黄灯 · 底部绿灯（传统红绿灯顺序）。</p>
+
+      <div class="controls">
+        <button class="active" data-status="idle">空闲 · 绿灯</button>
+        <button data-status="thinking">思考 · 黄灯</button>
+        <button data-status="running">运行 · 红灯</button>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>方案 A · 竖向三灯</h3>
+          <p>与悬浮窗一致。</p>
+          <div class="showcase">
+            <div class="menubar light">
+              <span class="menubar-label">Wed 10:30</span>
+              <svg id="status-a-light" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"></svg>
+            </div>
+            <div class="menubar dark">
+              <span class="menubar-label">Wed 10:30</span>
+              <svg id="status-a-dark" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="border-color: rgba(110,168,254,0.35);">
+          <h3>方案 B · 胶囊外壳 ✓ 已选</h3>
+          <p>更紧凑，已接入菜单栏图标。</p>
+          <div class="showcase">
+            <div class="menubar light">
+              <svg id="status-b-light" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"></svg>
+            </div>
+            <div class="menubar dark">
+              <svg id="status-b-dark" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>App 图标 · 玻璃暗底配色（HIG 合规版）</h2>
+      <p class="hint">按 Apple HIG：1024 方形全出血背景（系统负责圆角）、安全区居中、无自绘光晕/外框。A5 配色。</p>
+
+      <div class="controls">
+        <button class="active" data-status="idle">空闲 · 绿灯</button>
+        <button data-status="thinking">思考 · 黄灯</button>
+        <button data-status="running">运行 · 红灯</button>
+      </div>
+
+      <div class="grid" id="app-theme-grid"></div>
+
+      <p class="pick"><strong>已定稿：</strong>A5 · 浅雾玻璃（HIG 合规结构 + A5 配色）。分层导出见 <code>assets/AppIcon/layers/</code>。</p>
+    </section>
+  </div>
+
+  <script>
+    const COLORS = {
+      red: "#ff453a",
+      yellow: "#ffd60a",
+      green: "#30d158"
+    };
+
+    const APP_THEMES = {
+      a1: {
+        title: "A1 · 冷灰玻璃",
+        desc: "原版中性灰，偏素",
+        bgTop: "#3a3a40", bgBottom: "#17171b",
+        shine: ["rgba(255,255,255,0.22)", "rgba(255,255,255,0)"],
+        outerBorder: "rgba(255,255,255,0.14)",
+        housingFill: "rgba(0,0,0,0.28)",
+        housingStroke: "rgba(255,255,255,0.10)"
+      },
+      a2: {
+        title: "A2 · 深蓝玻璃",
+        desc: "偏冷、略科技感",
+        bgTop: "#334158", bgBottom: "#141b28",
+        shine: ["rgba(160,190,255,0.18)", "rgba(255,255,255,0)"],
+        outerBorder: "rgba(150,180,255,0.16)",
+        housingFill: "rgba(8,14,28,0.55)",
+        housingStroke: "rgba(140,170,255,0.14)"
+      },
+      a3: {
+        title: "A3 · 紫雾玻璃",
+        desc: "Apple 系偏紫暗色",
+        bgTop: "#3f3650", bgBottom: "#18121f",
+        shine: ["rgba(210,180,255,0.16)", "rgba(255,255,255,0)"],
+        outerBorder: "rgba(200,170,255,0.14)",
+        housingFill: "rgba(16,10,24,0.50)",
+        housingStroke: "rgba(190,160,255,0.12)"
+      },
+      a4: {
+        title: "A4 · 暖石墨",
+        desc: "暖灰棕，不那么冷",
+        bgTop: "#3d3834", bgBottom: "#1a1612",
+        shine: ["rgba(255,230,200,0.14)", "rgba(255,255,255,0)"],
+        outerBorder: "rgba(255,220,180,0.12)",
+        housingFill: "rgba(20,14,10,0.45)",
+        housingStroke: "rgba(255,210,170,0.10)"
+      },
+        a5: {
+          title: "A5 · 浅雾玻璃 ✓ 已选",
+          desc: "更亮、更通透 · 已定稿为 App 图标",
+        bgTop: "#6a6a72", bgBottom: "#3a3a42",
+        shine: ["rgba(255,255,255,0.38)", "rgba(255,255,255,0.06)"],
+        outerBorder: "rgba(255,255,255,0.28)",
+        housingFill: "rgba(255,255,255,0.08)",
+        housingStroke: "rgba(255,255,255,0.22)"
+      },
+      a6: {
+        title: "A6 · 墨绿玻璃",
+        desc: "暗绿底，和绿灯呼应",
+        bgTop: "#2a3d36", bgBottom: "#101814",
+        shine: ["rgba(160,255,210,0.12)", "rgba(255,255,255,0)"],
+        outerBorder: "rgba(140,220,180,0.14)",
+        housingFill: "rgba(6,16,12,0.52)",
+        housingStroke: "rgba(120,200,160,0.12)"
+      }
+    };
+
+    const ACTIVE = {
+      idle: "green",
+      thinking: "yellow",
+      running: "red"
+    };
+
+    let currentStatus = "idle";
+
+    function renderStatusA(svg, fg) {
+      const active = ACTIVE[currentStatus];
+      const dim = fg === "#000" ? 0.22 : 0.28;
+      const on = fg;
+      const off = fg === "#000" ? `rgba(0,0,0,${dim})` : `rgba(255,255,255,${dim})`;
+
+      const lights = [
+        { key: "red", y: 3.5 },
+        { key: "yellow", y: 7.5 },
+        { key: "green", y: 11.5 }
+      ];
+
+      svg.innerHTML = lights.map(({ key, y }) => {
+        const fill = active === key ? on : off;
+        const r = active === key ? 2.2 : 1.8;
+        return `<circle cx="9" cy="${y}" r="${r}" fill="${fill}"/>`;
+      }).join("");
+    }
+
+    function renderStatusB(svg, fg) {
+      const active = ACTIVE[currentStatus];
+      const stroke = fg === "#000" ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.35)";
+      const on = fg;
+      const off = fg === "#000" ? "rgba(0,0,0,0.18)" : "rgba(255,255,255,0.18)";
+
+      svg.innerHTML = `
+        <rect x="5.5" y="1.5" width="7" height="15" rx="3.5" fill="none" stroke="${stroke}" stroke-width="1"/>
+        <circle cx="9" cy="5" r="1.5" fill="${active === "red" ? on : off}"/>
+        <circle cx="9" cy="9" r="1.5" fill="${active === "yellow" ? on : off}"/>
+        <circle cx="9" cy="13" r="1.5" fill="${active === "green" ? on : off}"/>
+      `;
+    }
+
+    function renderAppIcon(svg, themeKey) {
+      const theme = APP_THEMES[themeKey];
+      const active = ACTIVE[currentStatus];
+      const id = themeKey;
+
+      // HIG: square full-bleed background, no outer rounded mask in artwork
+      const bg = `
+        <defs>
+          <linearGradient id="bg-${id}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${theme.bgTop}"/>
+            <stop offset="100%" stop-color="${theme.bgBottom}"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="128" height="128" fill="url(#bg-${id})"/>
+      `;
+
+      const housing = `
+        <rect x="40" y="18" width="48" height="92" rx="24"
+          fill="rgba(18,18,20,0.88)"/>
+      `;
+
+      const lights = [
+        { key: "red", cy: 34 },
+        { key: "yellow", cy: 64 },
+        { key: "green", cy: 94 }
+      ];
+
+      const body = lights.map(({ key, cy }) => {
+        const on = active === key;
+        const color = COLORS[key];
+        const fill = on ? color : "rgba(255,255,255,0.18)";
+        return `<circle cx="64" cy="${cy}" r="8.5" fill="${fill}"/>`;
+      }).join("");
+
+      svg.innerHTML = bg + housing + `<g>${body}</g>`;
+    }
+
+    function buildAppThemeGrid() {
+      const grid = document.getElementById("app-theme-grid");
+      grid.innerHTML = Object.entries(APP_THEMES).map(([key, theme]) => `
+        <div class="card"${key === "a5" ? ' style="border-color: rgba(110,168,254,0.35);"' : ""}>
+          <h3>${theme.title}</h3>
+          <p>${theme.desc}</p>
+          <div class="app-grid">
+            <div>
+              <svg id="app-${key}-128" width="128" height="128" viewBox="0 0 128 128"></svg>
+              <span class="size-label">128 px</span>
+            </div>
+            <div>
+              <svg id="app-${key}-64" width="64" height="64" viewBox="0 0 128 128"></svg>
+              <span class="size-label">64 px</span>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderAll() {
+      renderStatusA(document.getElementById("status-a-light"), "#000");
+      renderStatusA(document.getElementById("status-a-dark"), "#fff");
+      renderStatusB(document.getElementById("status-b-light"), "#000");
+      renderStatusB(document.getElementById("status-b-dark"), "#fff");
+      Object.keys(APP_THEMES).forEach((key) => {
+        renderAppIcon(document.getElementById(`app-${key}-128`), key);
+        renderAppIcon(document.getElementById(`app-${key}-64`), key);
+      });
+    }
+
+    document.querySelectorAll("[data-status]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        currentStatus = btn.dataset.status;
+        document.querySelectorAll("[data-status]").forEach((b) => {
+          b.classList.toggle("active", b.dataset.status === currentStatus);
+        });
+        renderAll();
+      });
+    });
+
+    buildAppThemeGrid();
+    renderAll();
+  </script>
+</body>
+</html>

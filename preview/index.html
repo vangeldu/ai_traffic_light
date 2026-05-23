@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Traffic Light · Cursor 第一版方案预览</title>
+  <style>
+    :root {
+      --page-bg: #0f1117;
+      --panel: #171923;
+      --panel-2: #1d2130;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: rgba(255, 255, 255, 0.82);
+      --muted: rgba(255, 255, 255, 0.56);
+      --accent: #6ea8fe;
+      --green: #30d158;
+      --yellow: #ffd60a;
+      --red: #ff453a;
+      --code-bg: #0b0d12;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(110, 168, 254, 0.12), transparent 28%),
+        var(--page-bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .layout {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 28px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+    }
+
+    .preview-stage {
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), transparent),
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,0.025) 0,
+          rgba(255,255,255,0.025) 1px,
+          transparent 1px,
+          transparent 24px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          rgba(255,255,255,0.025) 0,
+          rgba(255,255,255,0.025) 1px,
+          transparent 1px,
+          transparent 24px
+        );
+      border-radius: 16px;
+      position: relative;
+    }
+
+    .stage-label {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    iframe {
+      border: 0;
+      width: 60px;
+      height: 154px;
+      background: transparent;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    button.active {
+      border-color: rgba(110, 168, 254, 0.45);
+      background: rgba(110, 168, 254, 0.12);
+      color: #dbeafe;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin: 0 0 12px;
+    }
+
+    h3 {
+      font-size: 14px;
+      margin: 18px 0 8px;
+      color: #dbeafe;
+    }
+
+    p, li {
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    ul {
+      padding-left: 18px;
+      margin: 0;
+    }
+
+    .legend {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot.red { background: var(--red); }
+    .dot.yellow { background: var(--yellow); }
+    .dot.green { background: var(--green); }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      overflow: auto;
+      font-size: 12px;
+      line-height: 1.55;
+      color: #d7deea;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .flow-step {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 13px;
+    }
+
+    .flow-step strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #dbeafe;
+    }
+
+    .note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 214, 10, 0.08);
+      border: 1px solid rgba(255, 214, 10, 0.18);
+      color: #fde68a;
+      font-size: 13px;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <section>
+      <h1>AI Traffic Light</h1>
+      <p class="subtitle">Cursor 第一版 · HTML 悬浮 UI 预览</p>
+
+      <div class="panel">
+        <div class="preview-stage">
+          <span class="stage-label">悬浮窗预览</span>
+          <iframe id="widgetFrame" src="../ui/widget.html" title="AI Traffic Light Widget" width="60" height="154"></iframe>
+        </div>
+
+        <div class="controls">
+          <button class="active" data-state="idle">🟢 空闲</button>
+          <button data-state="thinking">🟡 思考中</button>
+          <button data-state="running">🔴 运行中</button>
+        </div>
+
+        <div class="controls">
+          <button class="active" data-glass="liquid">Liquid Glass</button>
+          <button data-glass="frosted">毛玻璃</button>
+          <button data-glass="solid">纯色回退</button>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item"><span class="dot green"></span>绿灯：Agent 结束或未工作</div>
+          <div class="legend-item"><span class="dot yellow"></span>黄灯：推理 / thinking 阶段</div>
+          <div class="legend-item"><span class="dot red"></span>红灯：工具执行中（Shell、Read、Write 等）</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>第一版方案（仅 Cursor）</h2>
+      <p>UI 全部放在 HTML 里；macOS 壳只负责「透明置顶窗口 + 加载本地 HTML + 提供状态接口」。</p>
+
+      <div class="flow">
+        <div class="flow-step">
+          <strong>1. Cursor Hooks</strong>
+          用户级 `~/.cursor/hooks.json` 监听 Agent 生命周期，写入统一状态文件。
+        </div>
+        <div class="flow-step">
+          <strong>2. 状态文件</strong>
+          `~/Library/Application Support/ai-traffic-light/state.json`
+        </div>
+        <div class="flow-step">
+          <strong>3. 悬浮 App</strong>
+          透明 WebView 加载 `ui/widget.html`，轮询 `/state` 或监听文件变化。
+        </div>
+      </div>
+
+      <h3>状态机</h3>
+      <ul>
+        <li><code>beforeSubmitPrompt</code> / <code>afterAgentThought</code> → <strong>thinking</strong></li>
+        <li><code>preToolUse</code> → <strong>running</strong></li>
+        <li><code>postToolUse</code> 且无后续 thinking → 回到 <strong>thinking</strong></li>
+        <li><code>stop</code> / <code>sessionEnd</code> → <strong>idle</strong></li>
+      </ul>
+
+      <h3>Hook 映射</h3>
+      <pre><code>{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [{ "command": "~/.cursor/hooks/ai-traffic-light.sh thinking" }],
+    "afterAgentThought": [{ "command": "~/.cursor/hooks/ai-traffic-light.sh thinking" }],
+    "preToolUse": [{ "command": "~/.cursor/hooks/ai-traffic-light.sh running" }],
+    "postToolUse": [{ "command": "~/.cursor/hooks/ai-traffic-light.sh thinking" }],
+    "stop": [{ "command": "~/.cursor/hooks/ai-traffic-light.sh idle" }],
+    "sessionEnd": [{ "command": "~/.cursor/hooks/ai-traffic-light.sh idle" }]
+  }
+}</code></pre>
+
+      <h3>状态写入脚本（示意）</h3>
+      <pre><code>#!/bin/bash
+STATE_DIR="$HOME/Library/Application Support/ai-traffic-light"
+STATE_FILE="$STATE_DIR/state.json"
+mkdir -p "$STATE_DIR"
+
+STATE="${1:-idle}"
+cat > "$STATE_FILE" <<EOF
+{"state":"$STATE","source":"cursor","updated_at":"$(date -u +%Y-%m-%dT%H:%M:%SZ)"}
+EOF</code></pre>
+
+      <h3>目录结构</h3>
+      <pre><code>ai_traffic_light/
+├── ui/widget.html          # 悬浮窗 UI（当前文件）
+├── preview/index.html      # 方案预览页（本页）
+├── hooks/ai-traffic-light.sh
+└── app/                      # 下一步：macOS 透明 WebView 壳
+    └── main.swift</code></pre>
+
+      <div class="note">
+        下一步实现：Swift 壳加载 <code>ui/widget.html</code>，本地 HTTP 暴露 <code>/state</code>，窗口层级设为 floating + 可拖拽。你确认 UI 后我再写壳和 hook 安装脚本。
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const frame = document.getElementById("widgetFrame");
+    const stateButtons = document.querySelectorAll("[data-state]");
+    const glassButtons = document.querySelectorAll("[data-glass]");
+    let currentState = "idle";
+    let currentGlass = "liquid";
+
+    function updateFrame() {
+      frame.src = `../ui/widget.html?state=${currentState}&glass=${currentGlass}&t=${Date.now()}`;
+    }
+
+    function setPreviewState(state) {
+      currentState = state;
+      stateButtons.forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.state === state);
+      });
+      updateFrame();
+    }
+
+    function setPreviewGlass(glass) {
+      currentGlass = glass;
+      glassButtons.forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.glass === glass);
+      });
+      updateFrame();
+    }
+
+    stateButtons.forEach((btn) => {
+      btn.addEventListener("click", () => setPreviewState(btn.dataset.state));
+    });
+
+    glassButtons.forEach((btn) => {
+      btn.addEventListener("click", () => setPreviewGlass(btn.dataset.glass));
+    });
+
+    updateFrame();
+  </script>
+</body>
+</html>

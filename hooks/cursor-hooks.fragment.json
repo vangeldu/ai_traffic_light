@@ -1,0 +1,32 @@
+{
+  "beforeSubmitPrompt": [
+    {
+      "command": "__HOOK_CMD__ set thinking cursor"
+    }
+  ],
+  "afterAgentThought": [
+    {
+      "command": "__HOOK_CMD__ set thinking cursor"
+    }
+  ],
+  "preToolUse": [
+    {
+      "command": "__HOOK_CMD__ set running cursor"
+    }
+  ],
+  "postToolUse": [
+    {
+      "command": "__HOOK_CMD__ set thinking cursor"
+    }
+  ],
+  "stop": [
+    {
+      "command": "__HOOK_CMD__ set idle cursor"
+    }
+  ],
+  "sessionEnd": [
+    {
+      "command": "__HOOK_CMD__ set idle cursor"
+    }
+  ]
+}

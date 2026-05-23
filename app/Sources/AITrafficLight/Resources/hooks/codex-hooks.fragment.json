@@ -1,0 +1,44 @@
+{
+  "UserPromptSubmit": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "__HOOK_CMD__ set thinking codex"
+        }
+      ]
+    }
+  ],
+  "PreToolUse": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "__HOOK_CMD__ set running codex"
+        }
+      ]
+    }
+  ],
+  "PostToolUse": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "__HOOK_CMD__ set thinking codex"
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "__HOOK_CMD__ set idle codex"
+        }
+      ]
+    }
+  ]
+}

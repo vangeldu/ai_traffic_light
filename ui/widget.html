@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Traffic Light</title>
+  <style>
+    :root {
+      --w: 60px;
+      --h: 154px;
+      --pad-x: 8px;
+      --pad-y: 10px;
+      --gap: 9px;
+      --light: 26px;
+      --radius: 18px;
+      --panel-border: rgba(255, 255, 255, 0.22);
+      --socket: rgba(0, 0, 0, 0.38);
+      --socket-border: rgba(255, 255, 255, 0.12);
+      --text: rgba(255, 255, 255, 0.72);
+      --brand: rgba(255, 255, 255, 0.58);
+      --red: #ff453a;
+      --yellow: #ffd60a;
+      --green: #30d158;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: var(--w);
+      height: var(--h);
+      overflow: hidden;
+      background: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+    }
+
+    .widget {
+      width: var(--w);
+      height: var(--h);
+      padding: var(--pad-y) var(--pad-x);
+      cursor: grab;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      border-radius: calc(var(--radius) - 2px);
+      border: 0.5px solid var(--panel-border);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    }
+
+    .widget:active { cursor: grabbing; }
+
+    body[data-glass="native"] .widget {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.20);
+    }
+
+    body[data-glass="liquid"] .widget {
+      border-radius: var(--radius);
+      corner-shape: squircle;
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 100%);
+      backdrop-filter: blur(22px) saturate(170%);
+      -webkit-backdrop-filter: blur(22px) saturate(170%);
+    }
+
+    body[data-glass="frosted"] .widget {
+      border-radius: 12px;
+      background: rgba(40, 40, 42, 0.48);
+      backdrop-filter: blur(18px) saturate(150%);
+      -webkit-backdrop-filter: blur(18px) saturate(150%);
+    }
+
+    body[data-glass="solid"] .widget {
+      border-radius: 12px;
+      background: rgba(28, 28, 30, 0.88);
+    }
+
+    .header {
+      width: 100%;
+      margin-bottom: 6px;
+    }
+
+    .brand {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--brand);
+      text-transform: uppercase;
+    }
+
+    .lights {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--gap);
+      flex: 1;
+      justify-content: center;
+    }
+
+    .light {
+      width: var(--light);
+      height: var(--light);
+      border-radius: 50%;
+      background: var(--socket);
+      border: 1px solid var(--socket-border);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.40);
+      transition: background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .light.red.on {
+      background: var(--red);
+      border-color: rgba(255, 120, 110, 0.55);
+      box-shadow: 0 0 10px rgba(255, 69, 58, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+
+    .light.yellow.on {
+      background: var(--yellow);
+      border-color: rgba(255, 230, 120, 0.55);
+      box-shadow: 0 0 10px rgba(255, 214, 10, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+
+    .light.green.on {
+      background: var(--green);
+      border-color: rgba(120, 230, 150, 0.55);
+      box-shadow: 0 0 10px rgba(48, 209, 88, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+
+    .status {
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    body[data-state="idle"] .status { color: rgba(72, 220, 110, 0.95); }
+    body[data-state="thinking"] .status { color: rgba(255, 214, 10, 0.95); }
+    body[data-state="running"] .status { color: rgba(255, 90, 80, 0.95); }
+  </style>
+</head>
+<body>
+  <div class="widget" id="widget">
+    <div class="header">
+      <span class="brand">AI</span>
+    </div>
+
+    <div class="lights" id="lights">
+      <div class="light red" data-state="running"></div>
+      <div class="light yellow" data-state="thinking"></div>
+      <div class="light green" data-state="idle"></div>
+    </div>
+
+    <div class="status" id="status">空闲</div>
+  </div>
+
+  <script>
+    const LABELS = { idle: "空闲", thinking: "思考", running: "运行" };
+    const params = new URLSearchParams(location.search);
+    const lightsEl = document.getElementById("lights");
+    const statusEl = document.getElementById("status");
+
+    function resolveGlassMode() {
+      const param = params.get("glass");
+      if (param) return param;
+      if (CSS.supports("corner-shape", "squircle") && CSS.supports("backdrop-filter", "blur(1px)")) return "liquid";
+      if (CSS.supports("backdrop-filter", "blur(1px)")) return "frosted";
+      return "solid";
+    }
+
+    document.body.dataset.glass = resolveGlassMode();
+
+    function setState(state) {
+      const next = LABELS[state] ? state : "idle";
+      lightsEl.querySelectorAll(".light").forEach((el) => {
+        el.classList.toggle("on", el.dataset.state === next);
+      });
+      statusEl.textContent = LABELS[next];
+      document.body.dataset.state = next;
+    }
+
+    async function pollState() {
+      try {
+        const res = await fetch("/state", { cache: "no-store" });
+        if (res.ok) setState((await res.json()).state || "idle");
+      } catch (_) {}
+    }
+
+    window.AITrafficLight = { setState, pollState };
+
+    if (params.has("state")) {
+      setState(params.get("state"));
+    } else if (document.body.dataset.glass === "native") {
+      setState("idle");
+    } else {
+      setState("idle");
+      setInterval(pollState, 500);
+    }
+  </script>
+</body>
+</html>
