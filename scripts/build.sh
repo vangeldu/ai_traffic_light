@@ -65,6 +65,8 @@ if [[ ! -d "$RESOURCE_BUNDLE" ]]; then
   exit 1
 fi
 cp -R "$RESOURCE_BUNDLE" "$APP_BUNDLE/Contents/Resources/"
+BUNDLE_WIDGET="$APP_BUNDLE/Contents/Resources/AITrafficLight_AITrafficLight.bundle/Contents/Resources/widget.html"
+cp "${ROOT}/ui/widget.html" "$BUNDLE_WIDGET"
 cp "$HOOK_BIN" "$APP_BUNDLE/Contents/Resources/hooks/ai-traffic-light-hook"
 cp "$HOOKS_RESOURCE_DIR/"*.fragment.json "$APP_BUNDLE/Contents/Resources/hooks/"
 cp "$HOOKS_RESOURCE_DIR/trust-codex-hooks.py" "$APP_BUNDLE/Contents/Resources/hooks/"
