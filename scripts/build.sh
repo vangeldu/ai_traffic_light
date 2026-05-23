@@ -13,6 +13,7 @@ ICNS="${ROOT}/assets/AppIcon.icns"
 mkdir -p "$RESOURCE_DIR" "$HOOKS_RESOURCE_DIR"
 cp "${ROOT}/ui/widget.html" "${RESOURCE_DIR}/widget.html"
 cp "${ROOT}/hooks/"*.fragment.json "$HOOKS_RESOURCE_DIR/"
+cp "${ROOT}/hooks/trust-codex-hooks.py" "$HOOKS_RESOURCE_DIR/"
 
 cd "$APP_DIR"
 swift build -c release --product AITrafficLight --product AITrafficLightHook
@@ -33,6 +34,7 @@ mkdir -p "$APP_BUNDLE/Contents/Resources/hooks"
 cp "$BIN" "$APP_BUNDLE/Contents/MacOS/AITrafficLight"
 cp "$HOOK_BIN" "$APP_BUNDLE/Contents/Resources/hooks/ai-traffic-light-hook"
 cp "$HOOKS_RESOURCE_DIR/"*.fragment.json "$APP_BUNDLE/Contents/Resources/hooks/"
+cp "$HOOKS_RESOURCE_DIR/trust-codex-hooks.py" "$APP_BUNDLE/Contents/Resources/hooks/"
 cp "$ICNS" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
 
 cat > "$APP_BUNDLE/Contents/Info.plist" <<'EOF'

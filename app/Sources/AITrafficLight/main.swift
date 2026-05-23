@@ -1,4 +1,5 @@
 import AppKit
+import TrafficLightCore
 import WebKit
 
 enum GlassSupport {
@@ -97,6 +98,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        _ = try? StateWriter.resetAllSourcesToIdle()
         HookInstaller.installOnLaunch()
 
         let contentRect = NSRect(origin: .zero, size: GlassSupport.panelSize)
@@ -141,6 +143,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         stateWatcher = StateWatcher { [weak self] state in
             self?.applyState(state)
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.applyState(StateWriter.reconcile(persistChanges: true), force: true)
         }
     }
 
@@ -337,11 +343,7 @@ final class StateWatcher {
     }
 
     private func readState() {
-        guard let data = try? Data(contentsOf: stateURL),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let state = json["state"] as? String else {
-            return
-        }
+        let state = StateWriter.reconcile(persistChanges: true)
         onChange(state)
     }
 }

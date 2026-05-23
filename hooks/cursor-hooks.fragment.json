@@ -4,11 +4,6 @@
       "command": "__HOOK_CMD__ set thinking cursor"
     }
   ],
-  "afterAgentThought": [
-    {
-      "command": "__HOOK_CMD__ set thinking cursor"
-    }
-  ],
   "preToolUse": [
     {
       "command": "__HOOK_CMD__ set running cursor"
@@ -19,14 +14,19 @@
       "command": "__HOOK_CMD__ set thinking cursor"
     }
   ],
+  "afterAgentResponse": [
+    {
+      "command": "__HOOK_CMD__ set idle all"
+    }
+  ],
   "stop": [
     {
-      "command": "__HOOK_CMD__ set idle cursor"
+      "command": "__HOOK_CMD__ set idle all"
     }
   ],
   "sessionEnd": [
     {
-      "command": "__HOOK_CMD__ set idle cursor"
+      "command": "__HOOK_CMD__ set idle all"
     }
   ]
 }

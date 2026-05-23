@@ -2,10 +2,10 @@
 
 [中文文档](README.zh-CN.md)
 
-A macOS floating traffic-light widget that shows AI agent activity across **Cursor**, **Claude Code**, and **Codex**.
+A macOS menu-bar app with a floating traffic-light widget that shows real-time AI agent activity across **Cursor**, **Claude Code**, and **OpenAI Codex**.
 
-- 🟢 **Idle** — agent is not running
-- 🟡 **Thinking** — prompt submitted / reasoning
+- 🟢 **Idle** — no active agent work
+- 🟡 **Thinking** — prompt submitted or reasoning in progress
 - 🔴 **Running** — tool call in progress
 
 ## Quick start (end users)
@@ -14,16 +14,18 @@ A macOS floating traffic-light widget that shows AI agent activity across **Curs
 # 1. Build or download the app, then open it
 open dist/AITrafficLight.app
 
-# 2. Use Cursor, Claude Code, or Codex as usual
+# 2. Fully quit and reopen Cursor, Claude Code, and/or Codex once
+
+# 3. Use your tools as usual — the lamp follows agent activity
 ```
 
-No install scripts are required. On first launch, the app automatically:
+**No install scripts are required.** On first launch, the app automatically:
 
 1. Installs the hook CLI to `~/.local/share/ai-traffic-light/bin/`
 2. Registers hooks for Cursor, Claude Code, and Codex
-3. Shows a one-time note about trusting Codex hooks (see below)
+3. Enables Codex hooks (`[features].hooks = true`) and auto-trusts them
 
-Use the menu bar item **Reinstall IDE Integration** if hooks need to be refreshed.
+Use the menu-bar item **Reinstall IDE Integration** if hooks need to be refreshed after an app update.
 
 ## For developers
 
@@ -38,7 +40,7 @@ Use the menu bar item **Reinstall IDE Integration** if hooks need to be refreshe
 ./scripts/install-all-hooks.sh
 ```
 
-Requirements: macOS 13+, Xcode Command Line Tools (Swift), Python 3 (dev scripts only).
+Requirements: macOS 13+, Xcode Command Line Tools (Swift). Python 3 is used by bundled helper scripts (Codex trust, dev install); macOS includes it by default.
 
 ## How it works
 
@@ -54,59 +56,81 @@ Floating macOS app (Swift + WKWebView)  <---- watches state file
 
 ### Multi-source merge
 
-Each IDE writes its own state. The effective lamp state is merged with priority:
+Each IDE writes its own state (`cursor`, `claude`, `codex`). The effective lamp state is merged with priority:
 
 `running` > `thinking` > `idle`
 
 When priorities tie, the most recently updated source wins.
 
+If a source stops sending events (for example a missing `stop` hook), stale states recover automatically: **60s** for `running`, **90s** for `thinking`.
+
+### Cursor + Claude Code in Cursor
+
+Cursor also loads hooks from `~/.claude/settings.json`. The hook CLI detects Cursor invocations (via `cursor_version` in hook stdin) and **skips** writing the `claude` / `codex` sources in that context, so Cursor activity is tracked only under the `cursor` source.
+
+When a Cursor turn ends, `afterAgentResponse` / `stop` / `sessionEnd` call `set idle all` to clear every source at once.
+
 ### Hook mapping
 
 | Tool | Event | State |
 |------|-------|-------|
-| Cursor | `beforeSubmitPrompt` / `afterAgentThought` | thinking |
+| Cursor | `beforeSubmitPrompt` | thinking |
 | Cursor | `preToolUse` | running |
 | Cursor | `postToolUse` | thinking |
-| Cursor | `stop` / `sessionEnd` | idle |
+| Cursor | `afterAgentResponse` / `stop` / `sessionEnd` | idle (all sources) |
 | Claude Code | `UserPromptSubmit` | thinking |
 | Claude Code | `PreToolUse` | running |
 | Claude Code | `PostToolUse` | thinking |
-| Claude Code | `Stop` / `SessionEnd` | idle |
+| Claude Code | `PostToolUseFailure` / `Stop` / `SessionEnd` | idle |
 | Codex | `UserPromptSubmit` | thinking |
 | Codex | `PreToolUse` | running |
 | Codex | `PostToolUse` | thinking |
 | Codex | `Stop` | idle |
 
+Config files touched:
+
+| Tool | Path |
+|------|------|
+| Cursor | `~/.cursor/hooks.json` |
+| Claude Code | `~/.claude/settings.json` |
+| Codex | `~/.codex/hooks.json`, `~/.codex/config.toml` |
+
 ## Project layout
 
 ```text
 ai_traffic_light/
-├── ui/widget.html              # Floating widget UI
-├── preview/                    # Browser previews
-├── hooks/                      # Hook templates (bundled into the app)
+├── ui/widget.html                  # Floating widget UI
+├── preview/                        # Browser previews
+├── hooks/                          # Hook templates + helpers (bundled into the app)
+│   ├── *-hooks.fragment.json
+│   ├── merge-hooks-config.py
+│   └── trust-codex-hooks.py
 ├── scripts/
 │   ├── build.sh
 │   ├── run.sh
-│   └── install-all-hooks.sh    # Dev-only hook installer
+│   └── install-all-hooks.sh        # Dev-only hook installer
 └── app/
-    ├── Sources/AITrafficLight/     # App + auto-installer
-    ├── Sources/AITrafficLightHook/ # Hook CLI shipped with the app
-    └── Sources/TrafficLightCore/   # Shared state writer
+    ├── Sources/AITrafficLight/         # App + auto-installer
+    ├── Sources/AITrafficLightHook/     # Hook CLI shipped with the app
+    └── Sources/TrafficLightCore/       # Shared state writer
 ```
 
 ## Manual testing
 
 ```bash
-~/.local/share/ai-traffic-light/bin/ai-traffic-light-hook set running claude
-~/.local/share/ai-traffic-light/bin/ai-traffic-light-hook set idle cursor
+HOOK=~/.local/share/ai-traffic-light/bin/ai-traffic-light-hook
+
+$HOOK set running claude
+$HOOK set thinking codex
+$HOOK set idle all          # reset every source
 ```
 
 ## Notes
 
-- **Codex**: run `/hooks` in the Codex CLI once and trust the new hooks (OpenAI security requirement).
-- Restart the IDE after hook changes or app updates.
-- Claude Code and Codex hooks are **appended** to your existing hook config.
-- Cursor hook entries for the same events are **replaced** by this app.
+- **Restart IDEs** after the first install or after **Reinstall IDE Integration**.
+- **Codex**: hooks are enabled and trusted automatically; if the lamp does not react, quit Codex completely (Cmd+Q) and reopen it.
+- Claude Code and Codex hooks are **appended** to your existing hook config (other hooks are kept).
+- Cursor hook entries managed by this app are **replaced** on reinstall; removed events (for example old `afterAgentThought` entries) are cleaned up.
 
 ## Roadmap
 

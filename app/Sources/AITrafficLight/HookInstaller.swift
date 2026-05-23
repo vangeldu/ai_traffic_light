@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import TrafficLightCore
 
 struct HookInstallResult {
     let errors: [String]
@@ -62,6 +63,11 @@ enum HookInstaller {
             resourceName: "codex-hooks.fragment",
             errors: &errors
         )
+        ensureCodexHooksEnabled(
+            configURL: home.appendingPathComponent(".codex/config.toml"),
+            errors: &errors
+        )
+        trustCodexHooks(errors: &errors)
 
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
             UserDefaults.standard.set(version, forKey: installedVersionKey)
@@ -78,10 +84,9 @@ enum HookInstaller {
         let alert = NSAlert()
         alert.messageText = "IDE 集成已就绪"
         alert.informativeText = """
-        已自动配置 Cursor、Claude Code 和 Codex 的 hooks。
+        已自动配置 Cursor、Claude Code 和 Codex 的 hooks，并尝试自动信任 Codex hook。
 
-        若使用 Codex，首次请在 Codex 中运行 /hooks 并信任新 hook。
-        修改 hook 后，重启对应 IDE 即可生效。
+        若 Codex 灯仍无反应，请完全退出并重启 Codex.app 后再试。
         """
         alert.addButton(withTitle: "知道了")
         alert.runModal()
@@ -154,6 +159,21 @@ enum HookInstaller {
         var config = readJSONObject(at: configURL) ?? ["version": 1, "hooks": [:]]
         var hooks = config["hooks"] as? [String: Any] ?? [:]
 
+        for event in Array(hooks.keys) {
+            guard fragment[event] == nil else { continue }
+            guard let entries = hooks[event] as? [Any], !entries.isEmpty else { continue }
+            let onlyOurs = entries.allSatisfy { entry in
+                guard let data = try? JSONSerialization.data(withJSONObject: entry),
+                      let text = String(data: data, encoding: .utf8) else {
+                    return false
+                }
+                return text.contains(marker)
+            }
+            if onlyOurs {
+                hooks.removeValue(forKey: event)
+            }
+        }
+
         for (event, entries) in fragment {
             hooks[event] = entries
         }
@@ -185,6 +205,98 @@ enum HookInstaller {
 
         config["hooks"] = hooks
         writeJSONObject(config, to: configURL, errors: &errors, label: source)
+    }
+
+    private static func ensureCodexHooksEnabled(configURL: URL, errors: inout [String]) {
+        var text = (try? String(contentsOf: configURL, encoding: .utf8)) ?? ""
+        var changed = false
+
+        let deprecatedPatterns = [
+            "codex_hooks = true",
+            "codex_hooks=true",
+            "codex_hooks = false",
+            "codex_hooks=false"
+        ]
+        for pattern in deprecatedPatterns {
+            if text.contains(pattern) {
+                text = text.replacingOccurrences(of: pattern, with: "")
+                changed = true
+            }
+        }
+
+        if !containsHooksFeatureEnabled(in: text) {
+            if let featuresRange = text.range(of: "[features]") {
+                let insertPoint = text.index(featuresRange.upperBound, offsetBy: 0)
+                let prefix = text[..<insertPoint]
+                let suffix = text[insertPoint...]
+                if suffix.hasPrefix("\n") {
+                    text = String(prefix) + "\nhooks = true" + String(suffix)
+                } else {
+                    text = String(prefix) + "\nhooks = true\n" + String(suffix)
+                }
+            } else {
+                if !text.isEmpty && !text.hasSuffix("\n") {
+                    text += "\n"
+                }
+                text += "\n[features]\nhooks = true\n"
+            }
+            changed = true
+        }
+
+        guard changed else { return }
+
+        do {
+            try FileManager.default.createDirectory(at: configURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try text.write(to: configURL, atomically: true, encoding: .utf8)
+        } catch {
+            errors.append("写入 Codex config.toml 失败：\(error.localizedDescription)")
+        }
+    }
+
+    private static func containsHooksFeatureEnabled(in text: String) -> Bool {
+        text.contains("hooks = true") || text.contains("hooks=true")
+    }
+
+    private static func trustCodexHooks(errors: inout [String]) {
+        guard let script = bundledTrustScript() else {
+            errors.append("缺少 Codex hook 信任脚本")
+            return
+        }
+
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/python3")
+        process.arguments = [script.path]
+
+        let stderrPipe = Pipe()
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = stderrPipe
+
+        do {
+            try process.run()
+        } catch {
+            errors.append("运行 Codex hook 信任脚本失败：\(error.localizedDescription)")
+            return
+        }
+
+        process.waitUntilExit()
+        guard process.terminationStatus == 0 else {
+            let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+            let message = String(data: stderrData, encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            errors.append(message?.isEmpty == false ? message! : "Codex hook 信任失败")
+            return
+        }
+    }
+
+    private static func bundledTrustScript() -> URL? {
+        if let url = Bundle.main.url(
+            forResource: "trust-codex-hooks",
+            withExtension: "py",
+            subdirectory: "hooks"
+        ) {
+            return url
+        }
+        return Bundle.main.url(forResource: "trust-codex-hooks", withExtension: "py")
     }
 
     private static func mergeEventList(existing: [Any], incoming: [Any]) -> [Any] {

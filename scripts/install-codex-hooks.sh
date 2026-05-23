@@ -14,7 +14,9 @@ TMP_FRAGMENT="$(prepare_fragment "$FRAGMENT" "$HOOK_CMD")"
 trap 'rm -f "$TMP_FRAGMENT"' EXIT
 
 merge_hooks_config codex "$HOOKS_JSON" "$TMP_FRAGMENT"
+ensure_codex_hooks_feature
+trust_codex_hooks
 
 echo "Installed hook binary to ${HOOK_CMD}"
 echo "Updated Codex hooks at ${HOOKS_JSON}"
-echo "Open Codex and run /hooks to review and trust the new hooks if prompted."
+echo "Restart Codex.app so trusted hooks take effect."

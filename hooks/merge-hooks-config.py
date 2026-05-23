@@ -36,6 +36,15 @@ def merge_cursor(config_path: Path, fragment_path: Path) -> None:
     config.setdefault("version", 1)
     config.setdefault("hooks", {})
 
+    for event in list(config["hooks"].keys()):
+        entries = config["hooks"][event]
+        if not isinstance(entries, list) or not entries:
+            continue
+        if event in fragment:
+            continue
+        if all(MARKER in json.dumps(entry) for entry in entries):
+            del config["hooks"][event]
+
     for event, entries in fragment.items():
         config["hooks"][event] = entries
 
